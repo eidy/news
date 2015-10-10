@@ -12,3 +12,6 @@ To add extra articles just create a text file for each article in the world fold
 news_[article name].txt
 
 (i.e. news_crafting.txt would show an article for the command /news crafting)
+
+If there is no file, a popup won't be shown.
+
