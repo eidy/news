@@ -3,7 +3,10 @@ local news = {}
 
 news.path = minetest.get_worldpath()
 
-function news.formspec(player,article)
+-- Gets the article text
+function news.getarticle(article)
+
+	local newscontent = nil
 	
 	if ( article == "" or article == nil ) then
 		article = "news.txt"
@@ -12,25 +15,31 @@ function news.formspec(player,article)
 	end
 	
 	local newsfile = io.open(news.path.."/"..article,"r")
-	
-	local formspec = "size[12,10]"
-	
+ 
 	if newsfile ~= nil then
-		local newscontent = newsfile:read("*a")
-		formspec = formspec.."textarea[.25,.25;12,10;news;;"..newscontent.."]"
-	else		
-		formspec = formspec.."label[.25,.25;Article does not exist]"
-	end		
-	formspec = formspec.."button_exit[.25,9;2,1;exit;Close"
-	if ( newsfile ~= nil ) then
+		newscontent = newsfile:read("*a") 
 		newsfile:close()
 	end
+	
+	return newscontent
+end
+
+function news.formspec(newscontent)
+ 
+	local formspec = "size[12,10]" 
+	formspec = formspec.."textarea[.25,.25;12,10;;"..newscontent..";]"
+	formspec = formspec.."button_exit[.25,9;2,1;exit;Close"
+ 
 	return formspec
 end
 
 function news.show_formspec(player)
 	local name = player:get_player_name()
-	minetest.show_formspec(name,"news",news.formspec(player))
+	local newscontent = news.getarticle(article)	
+	if(newscontent == nil) then
+         return
+	end
+	minetest.show_formspec(name,"news",news.formspec(newscontent))
 	minetest.log('action','Showing formspec to '..name)
 end
 
@@ -40,7 +49,12 @@ minetest.register_chatcommand("news",{
 	description="Shows the server news",
 	func = function (name,params)
 		local player = minetest.get_player_by_name(name)
-		minetest.show_formspec(name,"news",news.formspec(player,params))	
+		local newscontent = news.getarticle(article)	
+		if(newscontent == nil) then		 
+			minetest.chat_send_player(name,"No news.")	
+		else	 
+			minetest.show_formspec(name,"news",news.formspec(newscontent))	
+		end
 	end,
 })
 
